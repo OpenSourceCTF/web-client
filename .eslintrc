@@ -1,0 +1,30 @@
+{
+	"parser": "babel-eslint",
+	"extends": [
+		"standard",
+		"plugin:import/errors",
+		"plugin:import/warnings"
+	],
+	"env": {
+		"es6": true,
+		"browser": true
+	},
+	"parserOptions": {
+		"ecmaVersion": 2017
+	},
+	"rules": {
+		// Enforce tabs instead of spaces
+		"no-tabs": "off",
+		"indent": ["error", "tab"],
+		// Allow console; server obviously, client logs will be stripped in
+		// production
+		"no-console": "off"
+	},
+	"settings": {
+		"import/resolver": {
+			"webpack": {
+				"config": "./webpack.config.js"
+			}
+		}
+	}
+}

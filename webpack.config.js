@@ -1,7 +1,5 @@
 'use strict'
 
-const webpack = require('webpack')
-
 module.exports = {
 	context: __dirname,
 	target: 'web',
@@ -14,10 +12,6 @@ module.exports = {
 		path: `${__dirname}/dist`,
 		libraryTarget: 'umd'
 	},
-	plugins: [
-		new webpack.optimize.OccurrenceOrderPlugin(true),
-		new webpack.optimize.AggressiveMergingPlugin()
-	],
 	module: {
 		rules: [
 			{

@@ -1,6 +1,6 @@
 const aspectRatio = 16 / 9
 const maxWidth = 1280
-const maxHeight = maxWidth / aspectRatio
+const maxHeight = Math.round(maxWidth / aspectRatio)
 
 const calcViewport = () => {
 	const width = Math.min(window.innerWidth, maxWidth)

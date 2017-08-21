@@ -4,6 +4,8 @@
 
 The web client for CTF Pro, consumable as a JS module.
 
+You will probably need the `website` project up and running to be able to utilise this client. Not only is it integrated there as a module, but that repo also hosts the image assets required.
+
 Browser support is the last 2 versions of modern browsers only (Chrome, Firefox, Edge, Safari). This is reflected in the Babel config.
 
 # Prerequisites

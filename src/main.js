@@ -1,4 +1,5 @@
 import * as Pixi from 'pixi.js'
+import Keyboard from './modules/keyboard'
 import calcViewport from './modules/calc-viewport'
 import logLoadProgress from './modules/log-load-progress'
 
@@ -48,17 +49,20 @@ export default selector => {
 	let redBall1
 
 	// Setup
+	const kb = new Keyboard()
 	let state
 
 	function setup () {
+		const { width: viewWidth, height: viewHeight } = renderer
+
 		redBall1 = new Sprite(
 			loader.resources['ball-red'].texture
 		)
 		redBall1.width = 50
 		redBall1.height = 50
 		redBall1.anchor.set(0.5, 0.5)
-		redBall1.rotation = 0.5
-		redBall1.position.set(200, 200)
+		redBall1.rotation = 5
+		redBall1.position.set(viewWidth / 2, viewHeight / 2)
 
 		stage.addChild(redBall1)
 
@@ -78,6 +82,9 @@ export default selector => {
 	}
 
 	function play () {
-		redBall1.x += 1
+		if (kb.up) redBall1.y -= 1
+		if (kb.down) redBall1.y += 1
+		if (kb.left) redBall1.x -= 1
+		if (kb.right) redBall1.x += 1
 	}
 }

@@ -18,7 +18,9 @@
   // standardised but are well worth using now anyway. Anything that's already
   // fully standardised is covered by the env preset above
   "plugins": [
+		// Static class properties & ES2016 property initialiser syntax
+		"transform-class-properties",
     // {...object}
-    "transform-object-rest-spread"
+		"transform-object-rest-spread"
   ]
 }

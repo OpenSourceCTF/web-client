@@ -1,4 +1,4 @@
-const aspectRatio = 3 / 2
+const aspectRatio = 16 / 10
 const maxWidth = 1280
 
 function fullscreenWidth () {

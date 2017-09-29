@@ -1,6 +1,7 @@
 import * as Pixi from 'pixi.js'
 import Keyboard from './modules/keyboard'
-import calcViewport from './modules/calc-viewport'
+import { calcViewport, maxWidth as maxViewWidth } from './modules/calc-viewport'
+import { requestFullscreen, exitFullscreen, fullscreenElement } from './modules/fullscreen'
 import logLoadProgress from './modules/log-load-progress'
 import sleep from './modules/sleep'
 
@@ -31,18 +32,14 @@ export default selector => {
 		resolution: 1
 	})
 
-	// Adjust viewport size on window resize
-	window.addEventListener('resize', () => {
-		const { width, height } = calcViewport()
+	// Create stage
+	const stage = new Container()
 
-		renderer.resize(width, height)
-	})
+	// Adjust viewport size on window resize
+	window.addEventListener('resize', resizeView)
 
 	// Add view to DOM
 	selector.appendChild(renderer.view)
-
-	// Create stage
-	const stage = new Container()
 
 	loader
 		.add(assets)
@@ -172,5 +169,27 @@ export default selector => {
 		pregameScene.visible = false
 		playScene.visible = false
 		endgameScene.visible = true
+	}
+
+	function resizeView () {
+		const { width, height } = calcViewport(renderer.view === fullscreenElement())
+		const ratio = width / maxViewWidth
+
+		stage.scale.x = stage.scale.y = ratio
+
+		renderer.resize(width, height)
+	}
+
+	function makeFullscreen () {
+		requestFullscreen(renderer.view)
+	}
+
+	function cancelFullscreen () {
+		exitFullscreen(renderer.view)
+	}
+
+	return {
+		makeFullscreen,
+		cancelFullscreen
 	}
 }

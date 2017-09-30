@@ -5,8 +5,6 @@ const requestFullscreen = (element) => {
 		element.webkitRequestFullscreen()
 	} else if (element.mozRequestFullScreen) {
 		element.mozRequestFullScreen()
-	} else if (element.msRequestFullscreen) {
-		element.msRequestFullscreen()
 	}
 }
 

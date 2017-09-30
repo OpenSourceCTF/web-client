@@ -1,18 +1,16 @@
-const aspectRatio = 16 / 9
+const aspectRatio = 16 / 10
 const maxWidth = 1280
-const maxHeight = Math.round(maxWidth / aspectRatio)
 
-const calcViewport = () => {
-	const width = Math.min(window.innerWidth, maxWidth)
-	const height = Math.min(window.innerHeight, maxHeight)
-
-	return width >= height * aspectRatio ? {
-		width: Math.round(height * aspectRatio),
-		height
-	} : {
-		width,
-		height: Math.round(width / aspectRatio)
-	}
+function fullscreenWidth () {
+	const screenRatio = window.screen.width / window.screen.height
+	return screenRatio > aspectRatio ? window.screen.height * aspectRatio : window.screen.width
 }
 
-export default calcViewport
+const calcViewport = (fullScreenEnabled) => {
+	const width = Math.floor(fullScreenEnabled ? fullscreenWidth() : Math.min(window.innerWidth, maxWidth))
+	const height = Math.round(width / aspectRatio)
+
+	return { width, height }
+}
+
+export { calcViewport, maxWidth }

@@ -13,7 +13,4 @@ const calcViewport = (fullScreenEnabled) => {
 	return { width, height }
 }
 
-export {
-	calcViewport,
-	maxWidth
-}
+export { calcViewport, maxWidth }

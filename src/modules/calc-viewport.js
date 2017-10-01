@@ -7,7 +7,7 @@ function fullscreenWidth () {
 }
 
 const calcViewport = (fullScreenEnabled) => {
-	const width = Math.floor(fullScreenEnabled ? fullscreenWidth() : Math.min(window.innerWidth, maxWidth))
+	const width = Math.floor(fullScreenEnabled ? fullscreenWidth() : 0.85 * Math.min(window.innerWidth, maxWidth))
 	const height = Math.round(width / aspectRatio)
 
 	return { width, height }

@@ -1,9 +1,33 @@
 import * as Pixi from 'pixi.js'
 import Keyboard from './modules/keyboard'
-import { calcViewport, maxWidth as maxViewWidth } from './modules/calc-viewport'
-import { requestFullscreen, exitFullscreen, fullscreenElement } from './modules/fullscreen'
+import {
+	calcViewport,
+	maxWidth as
+	maxViewWidth
+} from './modules/calc-viewport'
+import {
+	requestFullscreen,
+	exitFullscreen,
+	fullscreenElement
+} from './modules/fullscreen'
+import {
+	gfx as mapGfx,
+	renderBomb,
+	renderBoost,
+	renderFlag,
+	renderGate,
+	renderPortal,
+	renderPowerup,
+	renderSpike,
+	renderTile,
+	renderToggle,
+	renderWall
+} from './modules/maps'
 import logLoadProgress from './modules/log-load-progress'
 import sleep from './modules/sleep'
+
+// This is temporary
+import map from './maps_temp/transilio.json'
 
 const {
 	Container,
@@ -65,14 +89,18 @@ function setup () {
 	playScene.visible = false
 	stage.addChild(playScene)
 
-	// FPS counter
-	fpsCounter = new Text('', {
-		fontFamily: 'Courier',
-		fontSize: 12,
-		fill: 'white'
-	})
-	fpsCounter.position.set(10, 10)
-	playScene.addChild(fpsCounter)
+	// Render the map
+	map.tiles.forEach(renderTile)
+	map.gates.forEach(renderGate)
+	map.walls.forEach(renderWall)
+	map.spikes.forEach(renderSpike)
+	map.portals.forEach(renderPortal)
+	map.boosters.forEach(renderBoost)
+	map.bombs.forEach(renderBomb)
+	map.powerups.forEach(renderPowerup)
+	map.toggles.forEach(renderToggle)
+	map.flags.forEach(renderFlag)
+	playScene.addChild(mapGfx)
 
 	// Our first ball!
 	redBall1 = new Sprite(
@@ -114,13 +142,22 @@ function setup () {
 	endgameText.position.set(viewWidth / 2, viewHeight / 2)
 	endgameScene.addChild(endgameText)
 
+	// FPS counter
+	fpsCounter = new Text('', {
+		fontFamily: 'Courier',
+		fontSize: 12,
+		fill: 'white'
+	})
+	fpsCounter.position.set(10, 10)
+	stage.addChild(fpsCounter)
+
 	// Begin the game in pregame state, and after 2 seconds enter play state
 	state = pregame
 	sleep(2000).then(() => {
 		state = play
 
-		// After 10 seconds enter end state
-		sleep(10000).then(() => {
+		// After 60 seconds enter end state
+		sleep(60000).then(() => {
 			state = endgame
 		})
 	})
@@ -153,10 +190,14 @@ function play () {
 
 	fpsCounter.text = `FPS: ${Math.round(ticker.FPS)}`
 
-	if (kb.up) redBall1.y -= 1
-	if (kb.down) redBall1.y += 1
-	if (kb.left) redBall1.x -= 1
-	if (kb.right) redBall1.x += 1
+	if (kb.up) redBall1.y -= 2
+	if (kb.down) redBall1.y += 2
+	if (kb.left) redBall1.x -= 2
+	if (kb.right) redBall1.x += 2
+
+	// Align viewport with ball position
+	playScene.x = (redBall1.x - (renderer.width / 2)) * -1
+	playScene.y = (redBall1.y - (renderer.height / 2)) * -1
 
 	redBall1.rotation += 0.05
 }

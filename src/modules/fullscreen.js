@@ -18,7 +18,7 @@ const exitFullscreen = () => {
 	}
 }
 
-const fullscreenElement = () => 
+const fullscreenElement = () =>
 	document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement
 
 export { requestFullscreen, exitFullscreen, fullscreenElement }

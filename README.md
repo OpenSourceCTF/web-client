@@ -1,8 +1,8 @@
 <img src="https://media.giphy.com/media/144FER6Sz95uZW/giphy.gif">
 
-# CTF Pro web client
+# OSCTF web client
 
-The web client for CTF Pro, consumable as a JS module.
+The web client for OSCTF, consumable as a JS module.
 
 You will probably need the `website` project up and running to be able to utilise this client. Not only is it integrated there as a module, but that repo also hosts the image assets required.
 

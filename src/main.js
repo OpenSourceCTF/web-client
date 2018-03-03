@@ -80,9 +80,9 @@ const setDirFromKeyboard = () => {
 
 // *** Websocket setup
 let balls = []
-let map
+let map, gamestate
 
-const ip = '172.30.129.122' // '127.0.0.1'
+const ip = '127.0.0.1'
 const port = '5001'
 var ws = new WebSocket('ws://' + ip + ':' + port)
 
@@ -101,6 +101,7 @@ ws.onmessage = e => {
 		console.log('[CLIENT] Gamesync received from server')
 		console.log(data)
 		map = data.data.map
+		gamestate = data.data.state
 		setInterval(setDirFromKeyboard, 16)
 		loader.load(setup)
 		break
@@ -108,8 +109,7 @@ ws.onmessage = e => {
 		setInterval(setDirFromKeyboard, 16)
 		break
 	case 'ballsync':
-		balls[0].x = data.data.balls[0].px * scaler
-		balls[0].y = data.data.balls[0].py * scaler
+		data.data.balls.forEach(updateBall)
 		break
 	}
 }
@@ -118,29 +118,54 @@ ws.onerror = e => {
 	console.error(e.data)
 }
 
+const updateBall = (data) => {
+	// TODO: filter in this way is inefficient, although with maximum 8 players...
+	// also, filter returns an array
+	let ball = balls.filter(function (b) {
+		return (b.gameID === data.id)
+	})
+	if (ball.length) {
+		// TODO: Better checking for existence of balls that are sent by server
+		ball[0].position.set(data.px * scaler, data.py * scaler)
+	}
+}
+
+const populateBall = (data) => {
+	let ball = new PIXI.Graphics()
+	ball.beginFill(0xFF00FF)
+	ball.drawCircle(0, 0, scaler / 2)
+	ball.endFill()
+	ball.flags = data.flags
+	ball.alive = data.is_alive
+	ball.gameID = data.id
+	ball.playerID = data.player_id
+	ball.powerups = data.powerups
+	balls.push(ball)
+}
+
 const renderMap = (scene) => {
 	console.log('[CLIENT] Rendering map...')
 	// Render the map
 	map.tiles.forEach(renderTile)
-	console.log('  Tiles')
+	console.log(' Tiles ✔')
 	map.gates.forEach(renderGate)
-	console.log('  Gates')
+	console.log(' Gates ✔')
 	map.walls.forEach(renderWall)
-	console.log('  Walls')
+	console.log(' Walls ✔')
 	map.spikes.forEach(renderSpike)
-	console.log('  Spikes')
+	console.log(' Spikes ✔')
 	map.portals.forEach(renderPortal)
-	console.log('  Portals')
+	console.log(' Portals ✔')
 	map.boosters.forEach(renderBoost)
-	console.log('  Boosts')
+	console.log(' Boosts ✔')
 	map.bombs.forEach(renderBomb)
-	console.log('  Bombs')
+	console.log(' Bombs ✔')
 	map.powerups.forEach(renderPowerup)
-	console.log('  Powerups')
+	console.log(' Powerups ✔')
 	map.toggles.forEach(renderToggle)
-	console.log('  Toggles')
+	console.log(' Toggles ✔')
 	map.flags.forEach(renderFlag)
-	console.log('  Flags')
+	console.log(' Flags ✔')
 	scene.addChild(mapGfx)
 	console.log('[CLIENT] Map successfully rendered!')
 }
@@ -168,19 +193,16 @@ function setup () {
 	// Play scene
 	playScene = new Container()
 	playScene.visible = false
-	stage.addChild(playScene)
 
+	// TODO: Elements aren't rendered pixel perfectly yet
 	renderMap(playScene)
 
-	// Create a ball
-	let ball = new PIXI.Graphics()
-	ball.beginFill(0xFF0000)
-	ball.drawCircle(0, 0, scaler / 2)
-	ball.endFill()
-	ball.x = viewWidth / 2
-	ball.y = viewHeight / 2
-	playScene.addChild(ball)
-	balls.push(ball)
+	gamestate.balls.forEach(populateBall)
+	balls.forEach(function (ball) {
+		playScene.addChild(ball)
+	})
+
+	stage.addChild(playScene)
 
 	// Pregame scene
 	pregameScene = new Container()
@@ -260,8 +282,9 @@ function play () {
 	fpsCounter.text = `FPS: ${Math.round(ticker.FPS)}`
 
 	// Align viewport with ball position
-	// playScene.x = (ball.x - (renderer.width / 2)) * -1
-	// playScene.y = (ball.y - (renderer.height / 2)) * -1
+	// TODO: Get our own ball, not just the first indexed one
+	playScene.x = (balls[0].position.x - (renderer.width / 2)) * -1
+	playScene.y = (balls[0].position.y - (renderer.height / 2)) * -1
 }
 
 function endgame () {

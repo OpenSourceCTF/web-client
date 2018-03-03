@@ -25,6 +25,7 @@ import {
 import logLoadProgress from './modules/log-load-progress'
 import sleep from './modules/sleep'
 
+// *** Renderer setup
 const {
 	Container,
 	Graphics,
@@ -40,7 +41,6 @@ const assets = [{
 	url: 'ball-red.png'
 }]
 
-// Renderer setup ***
 const { width, height } = calcViewport()
 
 const renderer = new Renderer({
@@ -53,20 +53,20 @@ const renderer = new Renderer({
 // Create stage
 const stage = new Container()
 
+// Set scaler constant
+const scaler = 25
+
 // Adjust viewport size on window resize
 window.addEventListener('resize', resizeView)
 
-// Connection setup ***
-var initial = true
-const scaler = 25
-let balls = []
-let keys = (new Array(256)).fill(false)
+// *** Key listener setup
+let keys = new Array(256).fill(false)
 
 window.onkeyup = function (e) {
-	return (keys[e.key] = false)
+	keys[e.key] = false
 }
 window.onkeydown = function (e) {
-	return (keys[e.key] = true)
+	keys[e.key] = true
 }
 
 const setDirFromKeyboard = () => {
@@ -75,13 +75,17 @@ const setDirFromKeyboard = () => {
 		'xdir': (keys['a'] ? -1 : 0) + (keys['d'] ? +1 : 0),
 		'ydir': (keys['w'] ? -1 : 0) + (keys['s'] ? +1 : 0)
 	}
-
 	ws.send(JSON.stringify(wsdata))
 }
 
-var ip = '127.0.0.1'
-var port = '5001'
+// *** Websocket setup
+let balls = []
+let map
+
+const ip = '172.30.129.122' // '127.0.0.1'
+const port = '5001'
 var ws = new WebSocket('ws://' + ip + ':' + port)
+
 ws.onopen = e => {
 	console.log('[CLIENT] Opening communications with ' + ip + ':' + port)
 	ws.send(JSON.stringify({
@@ -96,13 +100,9 @@ ws.onmessage = e => {
 	case 'gamesync':
 		console.log('[CLIENT] Gamesync received from server')
 		console.log(data)
-		if (initial) {
-			loadMap(data.data.map)
-			setInterval(setDirFromKeyboard, 16)
-		} else {
-			loader.load(setup)
-			initial = false
-		}
+		map = data.data.map
+		setInterval(setDirFromKeyboard, 16)
+		loader.load(setup)
 		break
 	case 'player_added':
 		setInterval(setDirFromKeyboard, 16)
@@ -118,8 +118,8 @@ ws.onerror = e => {
 	console.error(e.data)
 }
 
-const loadMap = (map) => {
-	console.log('[CLIENT] Loading map...')
+const renderMap = (scene) => {
+	console.log('[CLIENT] Rendering map...')
 	// Render the map
 	map.tiles.forEach(renderTile)
 	console.log('  Tiles')
@@ -141,25 +141,15 @@ const loadMap = (map) => {
 	console.log('  Toggles')
 	map.flags.forEach(renderFlag)
 	console.log('  Flags')
-	playScene.addChild(mapGfx)
-	console.log('[CLIENT] Map successfully loaded!')
-
-	let ball = new PIXI.Graphics()
-	ball.beginFill(0xFF0000)
-	ball.drawCircle(0, 0, scaler / 2)
-	ball.endFill()
-	ball.x = 100
-	ball.y = 100
-
-	renderer.stage.addChild(ball)
-	balls.push(ball)
+	scene.addChild(mapGfx)
+	console.log('[CLIENT] Map successfully rendered!')
 }
 
 loader
 	.add(assets)
 	.on('progress', logLoadProgress)
 
-// Main setup ***
+// *** Main setup
 let state
 let ticker
 
@@ -180,15 +170,17 @@ function setup () {
 	playScene.visible = false
 	stage.addChild(playScene)
 
-	/* // Our first ball!
-	redBall1 = new Sprite(
-		loader.resources['ball-red'].texture
-	)
-	redBall1.width = 50
-	redBall1.height = 50
-	redBall1.anchor.set(0.5, 0.5)
-	redBall1.position.set(viewWidth / 2, viewHeight / 2)
-	playScene.addChild(redBall1) */
+	renderMap(playScene)
+
+	// Create a ball
+	let ball = new PIXI.Graphics()
+	ball.beginFill(0xFF0000)
+	ball.drawCircle(0, 0, scaler / 2)
+	ball.endFill()
+	ball.x = viewWidth / 2
+	ball.y = viewHeight / 2
+	playScene.addChild(ball)
+	balls.push(ball)
 
 	// Pregame scene
 	pregameScene = new Container()
@@ -283,7 +275,6 @@ function resizeView () {
 	const ratio = width / maxViewWidth
 
 	stage.scale.x = stage.scale.y = ratio
-
 	renderer.resize(width, height)
 }
 

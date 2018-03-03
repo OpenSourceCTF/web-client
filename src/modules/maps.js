@@ -1,9 +1,9 @@
-import * as Pixi from 'pixi.js'
+import * as PIXI from 'pixi.js'
 import { match, when } from 'match-when'
 import colorConvert from 'color-convert'
 import cfg from '../config'
 
-const { Graphics, Polygon } = Pixi
+const { Graphics, Polygon } = PIXI
 
 const hexStringToNumber = hex => parseInt(hex, 16)
 
@@ -60,9 +60,11 @@ export const renderFlag = ({ type, x, y }) => {
 }
 
 export const renderGate = ({ poly, type }) => {
+	// TODO: Render correct colors
 	const color = match(type, {
 		[when('on')]: 0xFFA500,
-		[when('off')]: 0x9800FF
+		[when('off')]: 0x9800FF,
+		[when()]: 0x00FF00
 	})
 
 	const gate = new Polygon(...s(
@@ -76,13 +78,16 @@ export const renderGate = ({ poly, type }) => {
 		.drawPolygon(gate)
 }
 
+// no gravity well rendering yet (do we even need it?)
+
 export const renderPortal = ({ x, y }) => {
+	// TODO: Different color for each set of linked portals to eliminate confusion?
 	gfx
 		.beginFill(0xFFFFFF, 1)
 		.drawCircle(...s(x + 0.5, y + 0.5, 0.5))
 }
 
-export const renderPowerup = ({ x, y }) => {
+export const renderPowerup = ({ type, x, y }) => {
 	gfx
 		.beginFill(0x00FF00, 1)
 		.drawCircle(...s(x + 0.5, y + 0.5, 0.5))
@@ -105,7 +110,7 @@ export const renderSpike = ({ x, y }) => {
 		.drawPolygon(genSpike(...s(x + 0.5, y + 0.5)))
 }
 
-export const renderTile = ({ poly, col }) => {
+/* export const renderTile = ({ poly, col }) => {
 	const color = hexStringToNumber(colorConvert.rgb.hex([col.r, col.g, col.b]))
 	const alpha = col.a / 255
 
@@ -118,17 +123,49 @@ export const renderTile = ({ poly, col }) => {
 	gfx
 		.beginFill(color, alpha)
 		.drawPolygon(tile)
+} */
+
+export const renderTile = ({ poly, type }) => {
+	// TODO: Find out purpose of c1, c2, c3 from Mr. G (whackashoe)
+	const color = hexStringToNumber(colorConvert.rgb.hex([poly.c1r, poly.c1g, poly.c1b]))
+	const alpha = poly.c1a
+
+	const tile = new Polygon(...s(
+		poly.x1, poly.y1,
+		poly.x2, poly.y2,
+		poly.x3, poly.y3
+	))
+
+	gfx
+		.beginFill(color, alpha)
+		.drawPolygon(tile)
 }
 
-export const renderToggle = ({ x, y }) => {
+export const renderToggle = ({ tags, timer, x, y }) => {
 	gfx
 		.beginFill(0xE8BC7A, 1)
 		.drawCircle(...s(x + 0.5, y + 0.5, 0.4))
 }
 
-export const renderWall = ({ poly, col }) => {
+/* export const renderWall = ({ poly, col }) => {
 	const color = hexStringToNumber(colorConvert.rgb.hex([col.r, col.g, col.b]))
 	const alpha = col.a / 255
+
+	const wall = new Polygon(...s(
+		poly.x1, poly.y1,
+		poly.x2, poly.y2,
+		poly.x3, poly.y3
+	))
+
+	gfx
+		.beginFill(color, alpha)
+		.drawPolygon(wall)
+} */
+
+export const renderWall = ({ poly, type }) => {
+	// TODO: Find out purpose of c1, c2, c3 from Mr. G (whackashoe)
+	const color = hexStringToNumber(colorConvert.rgb.hex([poly.c1r, poly.c1g, poly.c1b]))
+	const alpha = poly.c1a
 
 	const wall = new Polygon(...s(
 		poly.x1, poly.y1,

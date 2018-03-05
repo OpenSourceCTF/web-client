@@ -24,6 +24,7 @@ import {
 } from './modules/maps'
 import logLoadProgress from './modules/log-load-progress'
 import sleep from './modules/sleep'
+import cfg from './config'
 
 // *** Renderer setup
 const {
@@ -33,6 +34,8 @@ const {
 	Text,
 	ticker: { Ticker }
 } = PIXI
+
+const scale = cfg.get('GFX_SCALE')
 
 const loader = new PIXI.loaders.Loader('/static/img/client/')
 
@@ -53,9 +56,6 @@ const renderer = new Renderer({
 // Create stage
 const stage = new Container()
 
-// Set scaler constant
-const scaler = 25
-
 // Adjust viewport size on window resize
 window.addEventListener('resize', resizeView)
 
@@ -72,8 +72,8 @@ window.onkeydown = function (e) {
 const setDirFromKeyboard = () => {
 	const wsdata = {
 		'request': 'movement',
-		'xdir': (keys['a'] ? -1 : 0) + (keys['d'] ? +1 : 0),
-		'ydir': (keys['w'] ? -1 : 0) + (keys['s'] ? +1 : 0)
+		'xdir': (keys['a'] ? -1 : 0) + (keys['d'] ? 1 : 0),
+		'ydir': (keys['w'] ? -1 : 0) + (keys['s'] ? 1 : 0)
 	}
 	ws.send(JSON.stringify(wsdata))
 }
@@ -82,7 +82,7 @@ const setDirFromKeyboard = () => {
 let balls = []
 let map, gamestate
 
-const ip = '127.0.0.1'
+const ip = '172.30.129.122'
 const port = '5001'
 var ws = new WebSocket('ws://' + ip + ':' + port)
 
@@ -125,15 +125,14 @@ const updateBall = (data) => {
 		return (b.gameID === data.id)
 	})
 	if (ball.length) {
-		// TODO: Better checking for existence of balls that are sent by server
-		ball[0].position.set(data.px * scaler, data.py * scaler)
+		ball[0].position.set(data.px * scale, data.py * scale)
 	}
 }
 
 const populateBall = (data) => {
 	let ball = new PIXI.Graphics()
 	ball.beginFill(0xFF00FF)
-	ball.drawCircle(0, 0, scaler / 2)
+	ball.drawCircle(0, 0, scale / 2)
 	ball.endFill()
 	ball.flags = data.flags
 	ball.alive = data.is_alive
@@ -184,9 +183,6 @@ let pregameText
 let playScene
 let fpsCounter
 
-let endgameScene
-let endgameText
-
 function setup () {
 	const { width: viewWidth, height: viewHeight } = renderer
 
@@ -194,9 +190,9 @@ function setup () {
 	playScene = new Container()
 	playScene.visible = false
 
-	// TODO: Elements aren't rendered pixel perfectly yet
 	renderMap(playScene)
 
+	// TODO: Balls don't display in their correct position on the map
 	gamestate.balls.forEach(populateBall)
 	balls.forEach(function (ball) {
 		playScene.addChild(ball)
@@ -221,19 +217,6 @@ function setup () {
 	pregameText.position.set(viewWidth / 2, viewHeight / 2)
 	pregameScene.addChild(pregameText)
 
-	// Endgame scene
-	endgameScene = new Container()
-	endgameScene.visible = false
-	stage.addChild(endgameScene)
-
-	endgameText = new Text('Game over!', {
-		fontSize: 40,
-		fill: 'white'
-	})
-	endgameText.anchor.set(0.5, 0.5)
-	endgameText.position.set(viewWidth / 2, viewHeight / 2)
-	endgameScene.addChild(endgameText)
-
 	// FPS counter
 	fpsCounter = new Text('', {
 		fontFamily: 'Courier',
@@ -247,11 +230,6 @@ function setup () {
 	state = pregame
 	sleep(2000).then(() => {
 		state = play
-
-		// After 60 seconds enter end state
-		sleep(60000).then(() => {
-			state = endgame
-		})
 	})
 
 	main()
@@ -271,26 +249,17 @@ function main () {
 function pregame () {
 	pregameScene.visible = true
 	playScene.visible = true
-	endgameScene.visible = false
 }
 
 function play () {
 	pregameScene.visible = false
 	playScene.visible = true
-	endgameScene.visible = false
-
 	fpsCounter.text = `FPS: ${Math.round(ticker.FPS)}`
 
 	// Align viewport with ball position
 	// TODO: Get our own ball, not just the first indexed one
 	playScene.x = (balls[0].position.x - (renderer.width / 2)) * -1
 	playScene.y = (balls[0].position.y - (renderer.height / 2)) * -1
-}
-
-function endgame () {
-	pregameScene.visible = false
-	playScene.visible = false
-	endgameScene.visible = true
 }
 
 function resizeView () {

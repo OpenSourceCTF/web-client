@@ -1,5 +1,5 @@
 const cfg = new Map()
 
-cfg.set('GFX_SCALE', 40)
+cfg.set('GFX_SCALE', 36)
 
 export default cfg

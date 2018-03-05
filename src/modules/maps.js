@@ -17,7 +17,7 @@ export const gfx = new Graphics()
 export const renderBomb = ({ x, y }) => {
 	gfx
 		.beginFill(0x000000, 1)
-		.drawCircle(...s(x + 0.5, y + 0.5, 0.45))
+		.drawCircle(...s(x, y, 0.45))
 }
 
 export const renderBoost = ({ type, x, y }) => {
@@ -30,7 +30,7 @@ export const renderBoost = ({ type, x, y }) => {
 
 	gfx
 		.beginFill(color, 1)
-		.drawCircle(...s(x + 0.5, y + 0.5, 0.5))
+		.drawCircle(...s(x, y, 0.5))
 }
 
 const genFlag = (x, y) => new Polygon(
@@ -56,11 +56,11 @@ export const renderFlag = ({ type, x, y }) => {
 
 	gfx
 		.beginFill(color, 1)
-		.drawPolygon(genFlag(...s(x + 0.5, y + 0.5)))
+		.drawPolygon(genFlag(...s(x, y)))
 }
 
 export const renderGate = ({ poly, type }) => {
-	// TODO: Render correct colors
+	// TODO: Render correct colors for team
 	const color = match(type, {
 		[when('on')]: 0xFFA500,
 		[when('off')]: 0x9800FF,
@@ -84,13 +84,13 @@ export const renderPortal = ({ x, y }) => {
 	// TODO: Different color for each set of linked portals to eliminate confusion?
 	gfx
 		.beginFill(0xFFFFFF, 1)
-		.drawCircle(...s(x + 0.5, y + 0.5, 0.5))
+		.drawCircle(...s(x, y, 0.5))
 }
 
 export const renderPowerup = ({ type, x, y }) => {
 	gfx
 		.beginFill(0x00FF00, 1)
-		.drawCircle(...s(x + 0.5, y + 0.5, 0.5))
+		.drawCircle(...s(x, y, 0.5))
 }
 
 const genSpike = (x, y) => new Polygon(
@@ -107,28 +107,13 @@ const genSpike = (x, y) => new Polygon(
 export const renderSpike = ({ x, y }) => {
 	gfx
 		.beginFill(0x666666, 1)
-		.drawPolygon(genSpike(...s(x + 0.5, y + 0.5)))
+		.drawPolygon(genSpike(...s(x, y)))
 }
-
-/* export const renderTile = ({ poly, col }) => {
-	const color = hexStringToNumber(colorConvert.rgb.hex([col.r, col.g, col.b]))
-	const alpha = col.a / 255
-
-	const tile = new Polygon(...s(
-		poly.x1, poly.y1,
-		poly.x2, poly.y2,
-		poly.x3, poly.y3
-	))
-
-	gfx
-		.beginFill(color, alpha)
-		.drawPolygon(tile)
-} */
 
 export const renderTile = ({ poly, type }) => {
 	// TODO: Find out purpose of c1, c2, c3 from Mr. G (whackashoe)
 	const color = hexStringToNumber(colorConvert.rgb.hex([poly.c1r, poly.c1g, poly.c1b]))
-	const alpha = poly.c1a
+	const alpha = poly.c1a / 255
 
 	const tile = new Polygon(...s(
 		poly.x1, poly.y1,
@@ -144,28 +129,13 @@ export const renderTile = ({ poly, type }) => {
 export const renderToggle = ({ tags, timer, x, y }) => {
 	gfx
 		.beginFill(0xE8BC7A, 1)
-		.drawCircle(...s(x + 0.5, y + 0.5, 0.4))
+		.drawCircle(...s(x, y, 0.25))
 }
 
-/* export const renderWall = ({ poly, col }) => {
-	const color = hexStringToNumber(colorConvert.rgb.hex([col.r, col.g, col.b]))
-	const alpha = col.a / 255
-
-	const wall = new Polygon(...s(
-		poly.x1, poly.y1,
-		poly.x2, poly.y2,
-		poly.x3, poly.y3
-	))
-
-	gfx
-		.beginFill(color, alpha)
-		.drawPolygon(wall)
-} */
-
-export const renderWall = ({ poly, type }) => {
+export const renderWall = ({ poly }) => {
 	// TODO: Find out purpose of c1, c2, c3 from Mr. G (whackashoe)
 	const color = hexStringToNumber(colorConvert.rgb.hex([poly.c1r, poly.c1g, poly.c1b]))
-	const alpha = poly.c1a
+	const alpha = poly.c1a / 255
 
 	const wall = new Polygon(...s(
 		poly.x1, poly.y1,

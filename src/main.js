@@ -82,8 +82,8 @@ const setDirFromKeyboard = () => {
 let balls = []
 let map, gamestate
 
-const ip = '172.30.129.122'
-const port = '5001'
+const ip = cfg.get('IP_ADDRESS')
+const port = cfg.get('PORT')
 var ws = new WebSocket('ws://' + ip + ':' + port)
 
 ws.onopen = e => {
